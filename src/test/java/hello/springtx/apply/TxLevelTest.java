@@ -33,7 +33,8 @@ public class TxLevelTest {
     @Transactional(readOnly = true)
     static class LevelService {
 
-        @Transactional(readOnly = false)
+//        @Transactional(readOnly = false) 디폴트로 false가 되어있기 때문에 따로 추가할 필요가 없다
+        @Transactional
         public void write() {
             log.info("call write");
             printTxInfo();
