@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -26,6 +29,23 @@ class OrderServiceTest {
 
         //then
         Order findOrder = orderRepository.findById(order.getId()).get();
-        Assertions.assertThat(findOrder.getPayStatus()).isEqualTo("완료");
+        assertThat(findOrder.getPayStatus()).isEqualTo("완료");
     }
+
+    @Test
+    void runtimeException() {
+        //given
+        Order order = new Order();
+        order.setUserName("예외");
+
+        //when
+        assertThatThrownBy(() -> orderService.order(order))
+                .isInstanceOf(RuntimeException.class);
+
+        //then
+        Optional<Order> orderOptional = orderRepository.findById(order.getId());
+        assertThat(orderOptional.isEmpty()).isTrue();
+    }
+
+
 }
