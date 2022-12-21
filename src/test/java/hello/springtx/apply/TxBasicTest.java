@@ -13,7 +13,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Slf4j
 @SpringBootTest
-public class TxBasocTest {
+public class TxBasicTest {
 
     @Autowired
     BasicService basicService;
