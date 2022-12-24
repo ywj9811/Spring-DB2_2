@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
@@ -126,5 +127,28 @@ public class BasicTxTest {
                 .isInstanceOf(UnexpectedRollbackException.class);
         //내부에서 롤백이 발생하여 최종적으로 커밋에서 롤백으로 바뀌게 되면 UnexpectedRollbackException 이 발생하게 된다.
         //즉, 외부에서 커밋하려 하는데 rollback-only가 true일 경우 UnexpectedRollbackException을 발생시키는 것이다.
+    }
+
+    @Test
+    void inner_rollback_requires_new() {
+        log.info("외부 트랜잭션 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("outer.isNewTransaction() = {}", outer.isNewTransaction()); //True
+
+        log.info("내부 트랜잭션 시작");
+        DefaultTransactionAttribute definition = new DefaultTransactionAttribute();
+        definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        TransactionStatus inner = txManager.getTransaction(definition);
+        log.info("inner.isNewTransaction() = {}", inner.isNewTransaction()); //True
+        
+        log.info("내부 트랜잭션 롤백");
+        txManager.rollback(inner); //롤백
+
+        log.info("외부 트랜잭션 커밋");
+        txManager.commit(outer); //커밋
+        /**
+         * 이 경우 PROPAGATION_REQUIRES_NEW 에 의해서 내부의 경우에 트랜잭션을 새로 생성하기 때문에 롤백이 되어도 커밋이 되게 된다.
+         * 각각 작동하게 됨
+         */
     }
 }
