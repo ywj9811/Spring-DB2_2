@@ -25,7 +25,11 @@ class OrderServiceTest {
         order.setUserName("정상");
 
         //when
-        orderService.order(order);
+        try {
+            orderService.order(order);
+        } catch (NotEnoughMoneyException e) {
+            log.info("고객에게 잔고 부족을 알리고 별도의 계좌로 입금하도록 안내");
+        }
 
         //then
         Order findOrder = orderRepository.findById(order.getId()).get();
